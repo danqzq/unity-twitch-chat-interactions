@@ -30,6 +30,8 @@ namespace TwitchIntegration
         
         private static Dictionary<MethodInfo, List<TwitchMonoBehaviour>> _methodBehaviours;
         private static Dictionary<string, List<MethodInfo>> _typeMethods;
+
+        private static Dictionary<string, string> _aliasToCommandName;
         
         private static TcpClient _twitchClient;
         private static StreamReader _streamReader;
@@ -83,6 +85,7 @@ namespace TwitchIntegration
             _methodParameters = new Dictionary<MethodInfo, ParameterInfo[]>();
             _methodBehaviours = new Dictionary<MethodInfo, List<TwitchMonoBehaviour>>();
             _typeMethods = new Dictionary<string, List<MethodInfo>>();
+            _aliasToCommandName = new Dictionary<string, string>();
 
             var methods = AppDomain.CurrentDomain.GetAssemblies()
                 .SelectMany(x => x.GetTypes())
@@ -98,7 +101,8 @@ namespace TwitchIntegration
                     _typeMethods[method.DeclaringType.Name].Add(method);
                 else 
                     _typeMethods.Add(method.DeclaringType.Name, new List<MethodInfo> {method});
-                foreach (var alias in attr.Aliases) _methodsDict.Add(alias, method);
+                foreach (var alias in attr.Aliases) 
+                    _aliasToCommandName.Add(alias, attr.Name);
                 _methodParameters[method] = method.GetParameters();
             }
 
@@ -196,8 +200,11 @@ namespace TwitchIntegration
             
             //Get the command and the arguments from the raw message
             var splitPoint = rawMessage.IndexOf(' ');
-            var baseCommand = splitPoint < 0 ? rawMessage : rawMessage.Substring(1, splitPoint - 1);
+            var baseCommand = splitPoint < 0 ? rawMessage.Substring(1) : rawMessage.Substring(1, splitPoint - 1);
             var args = splitPoint < 0 ? new string[]{} : rawMessage.Substring(splitPoint + 1).Split(' ');
+
+            if (_aliasToCommandName.ContainsKey(baseCommand))
+                baseCommand = _aliasToCommandName[baseCommand];
             
             if (!_methodsDict.ContainsKey(baseCommand)) return;
             
@@ -247,6 +254,8 @@ namespace TwitchIntegration
                     "Twitch command arguments can only be int, float, bool, or string");
                 filteredArgs[i] = value;
             }
+            
+            Debug.Log("Calling command " + commandName);
 
             if (!_methodBehaviours.ContainsKey(method)) return;
 
