@@ -75,7 +75,7 @@ namespace TwitchIntegration
             IsAuthenticated = false;
 
             var url = "https://id.twitch.tv/oauth2/authorize?client_id=" + _settings.clientId +
-                           "&redirect_uri=http://localhost&response_type=token&scope=chat:read";
+                           "&redirect_uri=" + _settings.redirectUri + "&response_type=token&scope=chat:read";
             
 #if UNITY_WEBGL
             var webglURL = string.Format("window.open(\"{0}\")", url);

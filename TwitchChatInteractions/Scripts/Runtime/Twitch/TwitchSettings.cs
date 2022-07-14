@@ -12,6 +12,8 @@ namespace TwitchIntegration
         
         public string clientId;
         public string commandPrefix = "!";
+
+        public string redirectUri = "http://localhost";
         
         public TwitchCommandsMode commandsMode;
 

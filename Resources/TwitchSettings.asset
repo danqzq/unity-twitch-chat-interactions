@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: TwitchSettings
   m_EditorClassIdentifier: 
   isDebugMode: 1
-  clientId: 11dqybwzddmtq5e7kg57t663gd19uc
+  clientId: ""
   commandPrefix: '!'
   commandsMode: 0
   commandList:

@@ -15,6 +15,12 @@ namespace TwitchIntegrationEditor
 {
     public class TwitchCommandsEditor : EditorWindow
     {
+        private enum Tab
+        {
+            Commands,
+            Settings
+        }
+        
         private VisualElement _commandsTabRightPane;
         private ListView _commandsTabLeftPane;
         
@@ -47,17 +53,15 @@ namespace TwitchIntegrationEditor
             var settingsTab = PopulateSettingsTab();
 
             var toolbar = new Toolbar();
-            toolbar.Add(new DropdownField(new List<string>
-            {
-                "Commands",
-                "Settings"
-            }, 0, s =>
+            var dropdown = new EnumField(Tab.Commands);
+            toolbar.RegisterCallback(new EventCallback<ChangeEvent<Enum>>(_ =>
             {
                 rootVisualElement.Clear();
                 rootVisualElement.Add(toolbar);
-                rootVisualElement.Add(s == "Commands" ? commandsTab : settingsTab);
-                return s;
+                rootVisualElement.Add((Tab) dropdown.value == Tab.Commands ? commandsTab : settingsTab);
             }));
+            toolbar.Add(dropdown);
+            rootVisualElement.Add(toolbar);
             rootVisualElement.Add(commandsTab);
         }
         
@@ -152,8 +156,6 @@ namespace TwitchIntegrationEditor
         {
             _commandsTabRightPane.Clear();
             var method = (MethodInfo) obj.First();
-            
-            var infoGroupBox = new GroupBox("Info:".ToBold());
 
             _commandsTabRightPane.Add(new TextElement
             {
@@ -162,9 +164,15 @@ namespace TwitchIntegrationEditor
             });
 
             if (!InheritsFromTwitchMonoBehaviour(method.DeclaringType))
-                infoGroupBox.Add(new HelpBox("The declaring class of the command " +
+                _commandsTabRightPane.Add(new HelpBox("The declaring class of the command " +
                                             "is not inherited from TwitchMonoBehaviour!\n" +
                                             "It will not execute in runtime!", HelpBoxMessageType.Error));
+            
+            var infoLabel = new Label("Info:".ToBold())
+            {
+                style = {paddingLeft = 5}
+            };
+            _commandsTabRightPane.Add(infoLabel);
 
             var declaringClassField = new TextField
             {
@@ -173,7 +181,7 @@ namespace TwitchIntegrationEditor
                 tooltip = "The class that declares the command",
                 style = {color = InheritsFromTwitchMonoBehaviour(method.DeclaringType) ? Color.white : Color.red}
             };
-            infoGroupBox.Add(declaringClassField);
+            _commandsTabRightPane.Add(declaringClassField);
             declaringClassField.SetEnabled(false);
 
             var attributeInfo = method.GetCustomAttribute<TwitchCommandAttribute>();
@@ -185,7 +193,7 @@ namespace TwitchIntegrationEditor
                 value = attributeInfo.Aliases.Any() ? string.Join(", ", attributeInfo.Aliases) : "None",
                 tooltip = "Alternative names that the command can be called by"
             };
-            infoGroupBox.Add(aliasesField);
+            _commandsTabRightPane.Add(aliasesField);
             aliasesField.SetEnabled(false);
 
             var cooldownTextField = new TextField
@@ -207,27 +215,30 @@ namespace TwitchIntegrationEditor
                     cooldownTextField.SetValueWithoutNotify(commandInfo.cooldown.ToString(CultureInfo.InvariantCulture));
                 }
             }));
-            infoGroupBox.Add(cooldownTextField);
-            
-            _commandsTabRightPane.Add(infoGroupBox);
+            _commandsTabRightPane.Add(cooldownTextField);
 
             var parameters = method.GetParameters().ToList();
             if (parameters.Count == 0) return;
+            
+            _commandsTabRightPane.Add(new Label("")); //just a little space
         
-            var parametersGroupBox = new GroupBox("Command Arguments:".ToBold());
+            var parametersLabel = new Label("Command Arguments:".ToBold())
+            {
+                style = {paddingLeft = 5}
+            };
+            _commandsTabRightPane.Add(parametersLabel);
 
             parameters.ForEach(parameter =>
             {
                 var parameterLabel = new Label($"{parameter.Name} : {DataTypeToString(parameter.ParameterType)}");
+                parameterLabel.style.paddingLeft = 5;
                 if (!IsParameterSupported(parameter.ParameterType))
                 {
                     parameterLabel.text += " [Unsupported] ";
                     parameterLabel.style.color = Color.red;
                 }
-                parametersGroupBox.Add(parameterLabel);
+                _commandsTabRightPane.Add(parameterLabel);
             });
-        
-            _commandsTabRightPane.Add(parametersGroupBox);
         }
         
         #endregion
@@ -263,6 +274,15 @@ namespace TwitchIntegrationEditor
             commandPrefixField.RegisterCallback(new EventCallback<ChangeEvent<string>>(_ =>
                 _settings.commandPrefix = commandPrefixField.value));
             settingsTab.Add(commandPrefixField);
+            
+            var redirectUriField = new TextField
+            {
+                label = "Redirect URI",
+                value = _settings.redirectUri
+            };
+            redirectUriField.RegisterCallback(new EventCallback<ChangeEvent<string>>(_ =>
+                _settings.redirectUri = redirectUriField.value));
+            settingsTab.Add(redirectUriField);
             
             var commandsMode = new EnumField("Commands Mode", _settings.commandsMode);
             commandsMode.RegisterCallback(new EventCallback<ChangeEvent<Enum>>(_ =>
