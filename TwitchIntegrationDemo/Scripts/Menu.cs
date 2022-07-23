@@ -11,9 +11,7 @@ namespace TwitchIntegration.Demo
         [SerializeField] 
         private string _authSuccess = "Successfully authenticated Twitch account!";
         [SerializeField, Multiline] 
-        private string _authRequired = "By pressing the button below, you will be redirected to a page " +
-                                       "where you must authorize your Twitch account with Sub-Optimal. " +
-                                       "This is required to enable Twitch chat interactions with the game.";
+        private string _authRequired = "Not authenticated!";
 
         public void OnAuthenticateButtonClicked()
         {
