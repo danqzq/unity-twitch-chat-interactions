@@ -1,4 +1,5 @@
-# unity-twitch-chat-interactions
+# Unity Twitch Chat Interactions
+[![Downloads](https://img.shields.io/github/downloads/danqzq/unity-twitch-chat-interactions/total.svg)](https://github.com/danqzq/unity-twitch-chat-interactions/releases/) [![Latest Version](https://img.shields.io/github/v/release/danqzq/unity-twitch-chat-interactions)](https://github.com/danqzq/unity-twitch-chat-interactions/releases/tag/v1.1)
 A Unity tool that will allow you to easily implement Twitch chat commands into your game!
 
 Watch a short guide to understand how to implement the tool into your project!
