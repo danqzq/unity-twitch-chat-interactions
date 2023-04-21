@@ -149,6 +149,14 @@ namespace TwitchIntegration
             var message = _streamReader.ReadLine();
             if (message == null) return;
 
+            //https://dev.twitch.tv/docs/irc/#keepalive-messages
+            //The client needs to respond to PING messages, or it will disconnect
+            if (message.StartsWith("PING "))
+            {
+                _streamWriter.WriteLine("PONG " + message.Substring(5));
+                _streamWriter.Flush();
+            }
+
             if (message.Contains(UserMessageCode))
                 OnMessageReceived(message);
             else if (message.Contains(UserJoinCode))
