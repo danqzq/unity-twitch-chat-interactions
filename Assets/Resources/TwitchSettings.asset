@@ -14,8 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   initializeOnAwake: 1
   isDebugMode: 1
-  clientId: 
+  clientId: exiozgh7nck6bigrb5i9t3bndugtrs
   commandPrefix: '!'
   redirectUri: http://localhost
   commandsMode: 0
-  commandList: []
+  commandList:
+  - name: test
+    enabled: 1
+    cooldown: 1

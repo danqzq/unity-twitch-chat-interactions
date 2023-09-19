@@ -26,16 +26,22 @@ namespace TwitchIntegrationEditor
         
         private static TwitchSettings _settings;
         
-        private static bool IsParameterSupported(Type type) => 
+        private static Action _onClientIDFilled;
+        
+        private static bool IsParameterSupported(Type type) => type == typeof(TwitchUser) ||
             type == typeof(string) || type == typeof(int) || type == typeof(float) || type == typeof(bool);
         
         private static bool InheritsFromTwitchMonoBehaviour(Type type) => 
             type.IsSubclassOf(typeof(TwitchMonoBehaviour));
 
+        private const string REGISTER_APP_URL = "https://dev.twitch.tv/docs/authentication/register-app";
+
+        private const string DEV_CREDITS = "Made by <color=#7ED4FB><u>Danial Jumagaliyev</u></color>";
+        private const string DEV_URL = "https://www.danqzq.games";
+
         [MenuItem("Dan's Tools/Twitch Commands")]
         public static void ShowEditorWindow()
         {
-            // This method is called when the user selects the menu item in the Editor
             EditorWindow wnd = GetWindow<TwitchCommandsEditor>();
             wnd.titleContent = new GUIContent("Twitch");
         }
@@ -90,12 +96,22 @@ namespace TwitchIntegrationEditor
 
             if (string.IsNullOrEmpty(_settings.clientId))
             {
-                _commandsTabRightPane.Add(new HelpBox("Please set your game's Twitch Client ID in the Settings tab", HelpBoxMessageType.Warning));
-                var linkToDocumentation = new Button(() => Application.OpenURL("https://dev.twitch.tv/docs/authentication/register-app"))
+                var helpBox = new HelpBox("Please set your game's Twitch Client ID in the Settings tab",
+                    HelpBoxMessageType.Warning);
+                var linkToDocumentation = new Button(() => Application.OpenURL(REGISTER_APP_URL))
                 {
                     text = "How do I get my Twitch Client ID?"
                 };
+                _commandsTabRightPane.Add(helpBox);
                 _commandsTabRightPane.Add(linkToDocumentation);
+
+                _onClientIDFilled = () =>
+                {
+                    if (_commandsTabRightPane.Contains(helpBox)) 
+                        _commandsTabRightPane.Remove(helpBox);
+                    if (_commandsTabRightPane.Contains(linkToDocumentation)) 
+                        _commandsTabRightPane.Remove(linkToDocumentation);
+                };
             }
             
             if (HasDuplicateMethodNames(methodCollection))
@@ -230,8 +246,10 @@ namespace TwitchIntegrationEditor
 
             parameters.ForEach(parameter =>
             {
-                var parameterLabel = new Label($"{parameter.Name} : {DataTypeToString(parameter.ParameterType)}");
-                parameterLabel.style.paddingLeft = 5;
+                var parameterLabel = new Label($"{parameter.Name} : {DataTypeToString(parameter.ParameterType)}")
+                {
+                    style = {paddingLeft = 5}
+                };
                 if (!IsParameterSupported(parameter.ParameterType))
                 {
                     parameterLabel.text += " [Unsupported] ";
@@ -264,6 +282,7 @@ namespace TwitchIntegrationEditor
                 clientIdField.labelElement.style.color = string.IsNullOrEmpty(clientIdField.value) ? 
                     Color.yellow : Color.white;
                 EditorUtility.SetDirty(_settings);
+                _onClientIDFilled?.Invoke();
             }));
             settingsTab.Add(clientIdField);
             
@@ -338,9 +357,9 @@ namespace TwitchIntegrationEditor
 
         private static Label CreateCreditLabel(Align alignment)
         {
-            var creditLabel = new Label("Made by <color=#7ED4FB><u>Danial Jumagaliyev</u></color>");
+            var creditLabel = new Label(DEV_CREDITS);
             creditLabel.RegisterCallback(new EventCallback<PointerDownEvent> (_ =>
-                Application.OpenURL("https://www.danqzq.games")));
+                Application.OpenURL(DEV_URL)));
             creditLabel.style.alignSelf = alignment;
             creditLabel.SendToBack();
             return creditLabel;
@@ -348,11 +367,10 @@ namespace TwitchIntegrationEditor
 
         private static string DataTypeToString(Type type)
         {
-            if (type == typeof(string)) return "string";
-            if (type == typeof(int))    return "int";
-            if (type == typeof(float))  return "float";
-            if (type == typeof(bool))   return "bool";
-            return type.Name;
+            return type == typeof(string) ? "string" :
+                type == typeof(int) ? "int" :
+                type == typeof(float) ? "float" :
+                type == typeof(bool) ? "bool" : type.Name;
         }
     }
 }
