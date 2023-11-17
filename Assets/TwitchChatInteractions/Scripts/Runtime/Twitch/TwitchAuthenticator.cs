@@ -64,8 +64,8 @@ namespace TwitchIntegration
         private IEnumerator TryAuthenticateCoroutine(Action<bool> onComplete)
         {
             _listener = new HttpListener();
-            _listener.Prefixes.Add("http://localhost/");
-            _listener.Prefixes.Add("http://127.0.0.1/");
+            _listener.Prefixes.Add("http://localhost");
+            _listener.Prefixes.Add("http://127.0.0.1");
             _listener.AuthenticationSchemes = AuthenticationSchemes.Anonymous;
             _listener.Start();
             
