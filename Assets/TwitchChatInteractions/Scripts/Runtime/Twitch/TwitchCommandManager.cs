@@ -261,7 +261,7 @@ namespace TwitchIntegration
 
             var filteredArgs = new object[parameters.Length];
             var increment = 0;
-            if (parameters[0].ParameterType == typeof(TwitchUser))
+            if (parameters.Length > 0 && parameters[0].ParameterType == typeof(TwitchUser))
             {
                 filteredArgs[0] = user;
                 increment = 1;
