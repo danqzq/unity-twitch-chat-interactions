@@ -27,7 +27,7 @@ namespace TwitchIntegration
             _settings = Resources.Load<TwitchSettings>(TwitchSettingsPath);
             IsAuthenticated = CheckAuthenticationStatus();
         }
-        
+
         private bool CheckAuthenticationStatus()
         {
             if (!PlayerPrefs.HasKey(TwitchOAuthTokenKey))
@@ -35,14 +35,14 @@ namespace TwitchIntegration
                 Log("Twitch client unauthenticated", "yellow");
                 return false;
             }
-            
+
             try
             {
                 _oauth = JsonUtility.FromJson<OAuth>(PlayerPrefs.GetString(TwitchOAuthTokenKey));
-                
+
                 if (string.IsNullOrEmpty(_oauth.accessToken))
                     throw new TwitchCommandException("Invalid Twitch client access token");
-                
+
                 IsAuthenticated = true;
                 Log("Twitch client authenticated", "green");
             }
@@ -68,15 +68,15 @@ namespace TwitchIntegration
             _listener.Prefixes.Add("http://127.0.0.1");
             _listener.AuthenticationSchemes = AuthenticationSchemes.Anonymous;
             _listener.Start();
-            
+
             _listenerThread = new Thread(StartListener);
             _listenerThread.Start();
-            
+
             IsAuthenticated = false;
 
             var url = "https://id.twitch.tv/oauth2/authorize?client_id=" + _settings.clientId +
-                           "&redirect_uri=" + _settings.redirectUri + "&response_type=token&scope=chat:read chat:edit";
-            
+                           "&redirect_uri=" + _settings.redirectUri + "&response_type=token&scope=chat:read%20chat:edit";
+
 #if UNITY_WEBGL
             var webglURL = string.Format("window.open(\"{0}\")", url);
             Application.ExternalEval(webglURL);
@@ -102,7 +102,7 @@ namespace TwitchIntegration
             PlayerPrefs.SetString(TwitchOAuthTokenKey, JsonUtility.ToJson(_oauth));
             if (!PlayerPrefs.HasKey(TwitchAuthenticatedKey)) PlayerPrefs.SetInt(TwitchAuthenticatedKey, 1);
         }
-        
+
         private void StartListener()
         {
             while (true)
@@ -112,11 +112,11 @@ namespace TwitchIntegration
                 result.AsyncWaitHandle.WaitOne();
             }
         }
-        
+
         private void GetContextCallback(IAsyncResult asyncResult)
         {
             var context = _listener.EndGetContext(asyncResult);
-            
+
             if (context.Request.HttpMethod == "POST")
             {
                 var dataText = new StreamReader(context.Request.InputStream, context.Request.ContentEncoding).ReadToEnd();
