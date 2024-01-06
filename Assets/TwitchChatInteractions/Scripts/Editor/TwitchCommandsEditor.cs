@@ -23,6 +23,9 @@ namespace TwitchIntegrationEditor
         
         private VisualElement _commandsTabRightPane;
         private ListView _commandsTabLeftPane;
+
+        private VisualElement _redirectUriError;
+        private VisualElement _portWarning;
         
         private static TwitchSettings _settings;
         
@@ -270,6 +273,16 @@ namespace TwitchIntegrationEditor
                 style = {fontSize = 24}
             });
             
+            _redirectUriError = new HelpBox("The redirect URI must end with a forward slash ('/')! " +
+                                            "Make sure it is written exactly as is in the list of OAuth Redirect URLs " +
+                                            "in your Twitch Application settings.", HelpBoxMessageType.Error);
+
+            _portWarning = new HelpBox("In case of errors in authentication, try changing the redirect URI to include a " +
+                                       "port (a set of 4-5 numbers separated by a colon from the end of the url, " + 
+                                       "e.g http://localhost:8080/). Make sure the port is also included in " + 
+                                       "the Redirect URL in your Twitch Application settings.",
+                                       HelpBoxMessageType.Warning);
+            
             var clientIdField = new TextField
             {
                 label = "Game Twitch Client ID",
@@ -307,9 +320,25 @@ namespace TwitchIntegrationEditor
             {
                 _settings.redirectUri = redirectUriField.value;
                 EditorUtility.SetDirty(_settings);
+                
+                if (!settingsTab.Contains(_redirectUriError))
+                    settingsTab.Add(_redirectUriError);
+                if (redirectUriField.value.EndsWith("/"))
+                    settingsTab.Remove(_redirectUriError);
+
+                if (!settingsTab.Contains(_portWarning))
+                    settingsTab.Add(_portWarning);
+                if (redirectUriField.value.Replace("://", "").Contains(":"))
+                    settingsTab.Remove(_portWarning);
             }));
             settingsTab.Add(redirectUriField);
             
+            if (!redirectUriField.value.EndsWith("/"))
+                settingsTab.Add(_redirectUriError);
+            
+            if (!redirectUriField.value.Replace("://", "").Contains(":"))
+                settingsTab.Add(_portWarning);
+
             var commandsMode = new EnumField("Commands Mode", _settings.commandsMode);
             commandsMode.RegisterCallback(new EventCallback<ChangeEvent<Enum>>(_ =>
             {

@@ -16,9 +16,6 @@ MonoBehaviour:
   isDebugMode: 1
   clientId: exiozgh7nck6bigrb5i9t3bndugtrs
   commandPrefix: '!'
-  redirectUri: http://localhost
+  redirectUri: http://localhost/
   commandsMode: 0
-  commandList:
-  - name: test
-    enabled: 1
-    cooldown: 1
+  commandList: []
