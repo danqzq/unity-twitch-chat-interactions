@@ -5,3 +5,7 @@ A Unity tool that will allow you to easily implement Twitch chat commands into y
 
 Watch a short guide to understand how to implement the tool into your project!
 [![YouTube Tutorial](https://img.youtube.com/vi/91okIXq-hO0/0.jpg)](https://www.youtube.com/watch?v=91okIXq-hO0)
+
+## Games using Unity Twitch Chat Interactions
+
+- [Digs](https://store.steampowered.com/app/2281870/Digs/)
