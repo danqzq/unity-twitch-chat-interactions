@@ -266,24 +266,69 @@ namespace TwitchIntegration
                 filteredArgs[0] = user;
                 increment = 1;
             }
+
+            //Loop through the params provided and compare vs the ones you have. If the ones you have in the order don't match the types for the ones you require, its wrong.
+            //If you could out of this fine, then you can fill in the rest of the commands with their default values.
+            bool validParams = false;
             
-            if (parameters.Length - increment != args.Count)
-                throw new TwitchCommandException("Invalid number of arguments for command: " + commandName);
+            List<string> argCopy = new ();
             
-            for (var i = 0; i < args.Count; i++)
+            for (int i = 0; i < parameters.Length; i++)
+            {
+                validParams = false;
+            
+                var requiredParam = parameters[i];
+                if (args.Count <= i)
+                {
+                    argCopy.Add(requiredParam.RawDefaultValue.ToString());
+                    validParams = true;
+                    continue;
+                }
+                argCopy.Add(args[i]);
+            
+                var givenParam = args[i];
+            
+                var isInt = Int32.TryParse(args[i], out Int32 intVal);
+                var isBool = bool.TryParse(args[i], out bool boolValue);
+                var isFloat = float.TryParse(args[i], out float floatVal);
+            
+                if (requiredParam.ParameterType == typeof(string) && (!isInt && !isBool && !isFloat))
+                {
+                    validParams = true;
+                }
+                else if(requiredParam.ParameterType == typeof(Int32) && isInt)
+                {
+                    validParams = true;
+                }
+                else if(requiredParam.ParameterType == typeof(bool) && isBool)
+                {
+                    validParams = true;
+                }
+                else if(requiredParam.ParameterType == typeof(float) && isFloat)
+                {
+                    validParams = true;
+                }
+            }
+
+            if (!validParams)
+            {
+                throw new TwitchCommandException("Invalid arguments for command: " + commandName);
+            }
+            
+            for (var i = 0; i < argCopy.Count; i++)
             {
                 object value;
-                if (parameters[i+increment].ParameterType == typeof(int))
-                    value = int.Parse(args[i]);
-                else if (parameters[i+increment].ParameterType == typeof(float))
-                    value = float.Parse(args[i]);
-                else if (parameters[i+increment].ParameterType == typeof(bool))
-                    value = bool.Parse(args[i]);
-                else if (parameters[i+increment].ParameterType == typeof(string))
-                    value = args[i];
+                if (parameters[i + increment].ParameterType == typeof(int))
+                    value = int.Parse(argCopy[i]);
+                else if (parameters[i + increment].ParameterType == typeof(float))
+                    value = float.Parse(argCopy[i]);
+                else if (parameters[i + increment].ParameterType == typeof(bool))
+                    value = bool.Parse(argCopy[i]);
+                else if (parameters[i + increment].ParameterType == typeof(string))
+                    value = argCopy[i];
                 else throw new TwitchCommandException(
                     "Twitch command arguments can only be int, float, bool, or string");
-                filteredArgs[i+increment] = value;
+                filteredArgs[i + increment] = value;
             }
             
             Log("Calling command: " + commandName, "white");
