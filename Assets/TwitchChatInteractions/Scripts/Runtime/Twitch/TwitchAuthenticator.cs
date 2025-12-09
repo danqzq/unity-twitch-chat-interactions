@@ -64,27 +64,27 @@ namespace TwitchIntegration
         private IEnumerator TryAuthenticateCoroutine(Action<bool> onComplete)
         {
             _listener = new HttpListener();
+            string redirectUri = _settings.redirectUri;
+            int port = new Uri(redirectUri).Port;
+            if (port == -1)
+            {
+                Debug.LogError("Port for redirect URI is not set! Defaulting to :3001");
+                port = 3001;
+            }
             
-            var redirectUri = _settings.redirectUri;
-            if (string.IsNullOrEmpty(redirectUri))
-                redirectUri = "http://localhost/";
-            
-            _listener.Prefixes.Add(redirectUri);
-            if (redirectUri.Contains("localhost"))
-                _listener.Prefixes.Add(redirectUri.Replace("localhost", "127.0.0.1"));
-            if (redirectUri.Contains("https"))
-                _listener.Prefixes.Add(redirectUri.Replace("https", "http"));
-            
+            // We are listening to any address on the port, instead of the address that was put in
+            // Because of https://github.com/danqzq/unity-twitch-chat-interactions/issues/9
+            _listener.Prefixes.Add($"http://*:{port}/");
             _listener.AuthenticationSchemes = AuthenticationSchemes.Anonymous;
             _listener.Start();
-
+            
             _listenerThread = new Thread(StartListener);
             _listenerThread.Start();
 
             IsAuthenticated = false;
 
-            var url = "https://id.twitch.tv/oauth2/authorize?client_id=" + _settings.clientId +
-                           "&redirect_uri=" + redirectUri + "&response_type=token&scope=chat:read%20chat:edit";
+            string url = "https://id.twitch.tv/oauth2/authorize?client_id=" + _settings.clientId +
+                         "&redirect_uri=" + redirectUri + "&response_type=token&scope=chat:read%20chat:edit";
 
 #if UNITY_WEBGL
             var webglURL = string.Format("window.open(\"{0}\")", url);
@@ -93,10 +93,10 @@ namespace TwitchIntegration
             Application.OpenURL(url);
 #endif
 
-            var processStartTime = Time.realtimeSinceStartup;
+            float processStartTime = Time.realtimeSinceStartup;
             while (!IsAuthenticated)
             {
-                var elapsedTime = Time.realtimeSinceStartup - processStartTime;
+                float elapsedTime = Time.realtimeSinceStartup - processStartTime;
                 if (elapsedTime >= Timeout)
                 {
                     Log("Authentication timed out", "red");
