@@ -144,7 +144,7 @@ namespace TwitchIntegrationEditor
                     _settings.commandList[index].enabled = toggle.value));
             };
             _commandsTabLeftPane.itemsSource = methodCollection;
-            _commandsTabLeftPane.onSelectionChange += OnMethodSelected;
+            _commandsTabLeftPane.selectionChanged += OnMethodSelected;
             
             _commandsTabLeftPane.hierarchy.Add(CreateCreditLabel(Align.Auto));
 
