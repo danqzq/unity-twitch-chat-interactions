@@ -64,9 +64,9 @@ namespace TwitchIntegration
         private IEnumerator TryAuthenticateCoroutine(Action<bool> onComplete)
         {
             _listener = new HttpListener();
-            string redirectUri = _settings.redirectUri;
-            int port = new Uri(redirectUri).Port;
-            if (port == -1)
+            var redirectUri = _settings.redirectUri;
+            var port = new Uri(redirectUri).Port;
+            if (port < 999)
             {
                 Debug.LogError("Port for redirect URI is not set! Defaulting to :3001");
                 port = 3001;
@@ -83,8 +83,8 @@ namespace TwitchIntegration
 
             IsAuthenticated = false;
 
-            string url = "https://id.twitch.tv/oauth2/authorize?client_id=" + _settings.clientId +
-                         "&redirect_uri=" + redirectUri + "&response_type=token&scope=chat:read%20chat:edit";
+            var url = "https://id.twitch.tv/oauth2/authorize?client_id=" + _settings.clientId +
+                      "&redirect_uri=" + redirectUri + "&response_type=token&scope=chat:read%20chat:edit";
 
 #if UNITY_WEBGL
             var webglURL = string.Format("window.open(\"{0}\")", url);
@@ -93,10 +93,10 @@ namespace TwitchIntegration
             Application.OpenURL(url);
 #endif
 
-            float processStartTime = Time.realtimeSinceStartup;
+            var processStartTime = Time.realtimeSinceStartup;
             while (!IsAuthenticated)
             {
-                float elapsedTime = Time.realtimeSinceStartup - processStartTime;
+                var elapsedTime = Time.realtimeSinceStartup - processStartTime;
                 if (elapsedTime >= Timeout)
                 {
                     Log("Authentication timed out", "red");

@@ -274,8 +274,9 @@ namespace TwitchIntegrationEditor
             });
             
             _redirectUriError = new HelpBox("The redirect URI must end with a forward slash ('/')! " +
+                                            "Correct address with a port should look like: http://localhost:8080/ " +
                                             "Make sure it is written exactly as is in the list of OAuth Redirect URLs " +
-                                            "in your Twitch Application settings.", HelpBoxMessageType.Error);
+                                            "in your Twitch Application settings, with port included.", HelpBoxMessageType.Error);
 
             _portWarning = new HelpBox("In case of errors in authentication, try changing the redirect URI to include a " +
                                        "port (a set of 4-5 numbers separated by a colon from the end of the url, " + 
