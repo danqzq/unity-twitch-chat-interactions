@@ -109,6 +109,7 @@ See [`Assets/TwitchIntegrationDemo`](Assets/TwitchIntegrationDemo) for demo scen
 
 ## Games using Unity Twitch Chat Interactions
 
+- [Gemporium](https://store.steampowered.com/app/2836100/Gemporium_A_Cute_Mining_Sim/)
 - [Map Map - A Game About Maps](https://store.steampowered.com/app/3672480/Map_Map__A_Game_About_Maps_Demo/)
 - [Digs](https://store.steampowered.com/app/2281870/Digs/)
 
